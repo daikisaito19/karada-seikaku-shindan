@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "verify": "npm run verify:src && npm run verify:parity && npm run verify:display && npm run verify:scale",
+    "verify:src": "echo '\\n==================== 1/4 診断ロジック (verify-src) ====================' && tsx scripts/redesign-v4/verify-src.ts",
+    "verify:parity": "echo '\\n==================== 2/4 プロトタイプとの一致 (engine-parity) ====================' && tsx scripts/redesign-v4/engine-parity.ts",
+    "verify:display": "echo '\\n==================== 3/4 4軸の表示スケール (verify-display) ====================' && tsx scripts/redesign-v4/verify-display.ts",
+    "verify:scale": "echo '\\n==================== 4/4 スケール表の再生成チェック ====================' && tsx scripts/redesign-v4/build-axis-scale.ts --check"
   },
   "dependencies": {
     "next": "16.3.5",
@@ -21,6 +26,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.5",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }
