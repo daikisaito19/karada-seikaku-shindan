@@ -5,6 +5,8 @@ import { RESULT_TYPES, getResultTypeById } from "@/data/resultTypes";
 import { decodeAnswers, evaluateAnswers, determineType } from "@/data/scoring";
 import { AxisMeter } from "@/components/AxisMeter";
 import { ShareActions } from "@/components/ShareActions";
+import { TypeHighlight } from "@/components/TypeHighlight";
+import { SCORED_TYPES } from "@/data/typeDefs";
 
 interface Props {
   params: Promise<{ type: string }>;
@@ -55,6 +57,10 @@ export default async function ResultPage({ params, searchParams }: Props) {
   const answers = decodeAnswers(a);
   const personalized = answers && determineType(answers).id === type.id;
   const result = personalized ? evaluateAnswers(answers!) : null;
+
+  // 「決め手」ブロック用。15波乗り・16クセ強は軸ランキングで決まらないので primary を持たない
+  const primary = SCORED_TYPES.find((t) => t.id === type.id)?.primary;
+  const primaryPercent = result && primary ? result.percent[primary] : null;
 
   return (
     <main className="flex flex-1 flex-col items-center px-4 py-10 sm:py-14">
@@ -127,6 +133,13 @@ export default async function ResultPage({ params, searchParams }: Props) {
             このリンクは共有された結果ページです。あなた自身の4軸グラフを見るには、診断を受けてみてください。
           </div>
         )}
+
+        <TypeHighlight
+          typeId={type.id}
+          color={type.color}
+          primaryPercent={primaryPercent}
+          metersShown={result !== null}
+        />
 
         <div className="mt-5 grid grid-cols-1 gap-4">
           <ResultBox title="✨ あなたの特徴" items={type.features} tone="good" />
