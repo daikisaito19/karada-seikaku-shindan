@@ -176,17 +176,24 @@ const unreachable = ALL_IDS.filter((id) => (dist[id] ?? 0) === 0);
 check("到達不能タイプ", unreachable.length === 0, unreachable.length ? unreachable.map((i) => NAME[i]).join(",") : "0タイプ（16タイプすべて到達可能）");
 
 // ---------------------------------------------------------- 5. 4軸メーター
-line("5. 4軸メーター（うるおいは 100-(BL+JIN)/2）");
+line("5. 4軸メーター（C2: エネルギー=100-max(QI,BL) / 流れ=100-max(ST,STA) / 温度=50+(YIN-YANG)/2 / うるおい=50+(DAM-JIN)/2）");
 console.table(
   BLIND.map((b) => {
     const v = computeVisibleAxes(computePercentScores(b.answers));
-    return { タイプ: b.label, エネルギー: v.energy, めぐり: v.flow, 温度: v.temperature, うるおい: v.moisture };
+    return { タイプ: b.label, エネルギー: v.energy, 流れ: v.flow, 温度: v.temperature, うるおい: v.moisture };
   })
 );
 const uru = computeVisibleAxes(computePercentScores(BLIND.find((b) => b.id === "uruoi-busoku")!.answers)).moisture;
 const hot = computeVisibleAxes(computePercentScores(BLIND.find((b) => b.id === "hotehote")!.answers)).moisture;
 check("09うるおい不足が乾燥側", uru < 50, `うるおい=${uru}`);
-check("06ほてほてが乾燥側ではない", hot >= 50, `うるおい=${hot}`);
+// 旧8軸では、うるおいが BL と JIN の平均だったため「06は乾燥側に出ないこと」を確かめていた。
+// C2で うるおい=50+(DAM-JIN)/2 になり、06(陰虚)も JIN の分だけ乾燥側に出る設計になったので、
+// 「06が乾かないこと」ではなく「乾燥の主役は09であること」を検証する。
+check(
+  "09うるおい不足が06ほてほてより明確に乾燥側",
+  uru < hot - 10,
+  `09=${uru} / 06=${hot}（差${hot - uru}）`
+);
 console.log("\nランダム回答での100%到達率:");
 console.table(
   (Object.keys(meterHist) as (keyof typeof meterHist)[]).map((k) => ({

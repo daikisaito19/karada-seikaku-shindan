@@ -49,12 +49,13 @@ for (const axis of SCALED_AXES) {
   check(`${axis} が0-100に収まる`, t.every((v) => v >= 0 && v <= 100), "範囲OK");
 }
 
-console.log("\n==== 2. 温度は変換しない ====\n");
-const tempSame = BLIND.every((b) => {
+console.log("\n==== 2. 温度とうるおいは変換しない ====\n");
+const bidirectionalSame = BLIND.every((b) => {
   const raw = computeVisibleAxes(judge(b.answers as Answers).percent);
-  return scaleVisibleAxes(raw).temperature === raw.temperature;
+  const sc = scaleVisibleAxes(raw);
+  return sc.temperature === raw.temperature && sc.moisture === raw.moisture;
 });
-check("温度が生の値のまま", tempSame, "ブラインド16件すべてで一致");
+check("温度・うるおいが生の値のまま", bidirectionalSame, "ブラインド16件すべてで一致");
 
 console.log("\n==== 3. 16タイプの表示 ====\n");
 const rows = BLIND.map((b) => {
@@ -87,7 +88,28 @@ if (uniqAfter.size < 16) {
   for (const [k, v] of Object.entries(m)) if (v.length > 1) console.log(`   重複: ${k} -> ${v.join(" / ")}`);
 }
 
-console.log("\n==== 4. 偏りの解消 ====\n");
+console.log("\n==== 4. 見た目で区別できるか ====\n");
+// ラベルが1段階違うだけでは、つまみの位置がほぼ同じで人間には同じ画面に見える。
+// C1では 09うるおい不足 と 10めぐり不足 が距離17（4本中3本がほぼ同位置）で区別できなかった。
+// C2で BL をエネルギー側に戻したことで分離したので、それが戻らないよう見張る。
+const dist = (a: (typeof rows)[number], b: (typeof rows)[number]) =>
+  Math.abs(a.scaled.energy - b.scaled.energy) +
+  Math.abs(a.scaled.flow - b.scaled.flow) +
+  Math.abs(a.scaled.temperature - b.scaled.temperature) +
+  Math.abs(a.scaled.moisture - b.scaled.moisture);
+const byNo = (no: number) => rows.find((r) => r.name.startsWith(String(no).padStart(2, "0")))!;
+const d0910 = dist(byNo(9), byNo(10));
+check("09うるおい不足と10めぐり不足が見た目で区別できる", d0910 >= 60, `つまみ位置の距離=${d0910}（C1では17）`);
+
+let worst = { pair: "", d: Infinity };
+for (let i = 0; i < rows.length; i++)
+  for (let j = i + 1; j < rows.length; j++) {
+    const d = dist(rows[i], rows[j]);
+    if (d < worst.d) worst = { pair: `${rows[i].name} ↔ ${rows[j].name}`, d };
+  }
+check("最も近い2タイプでも最低限の差がある", worst.d >= 15, `${worst.pair} 距離=${worst.d}`);
+
+console.log("\n==== 5. 偏りの解消 ====\n");
 let s = 31337;
 const rnd = () => {
   s = (s * 1103515245 + 12345) % 2147483648;
@@ -97,6 +119,8 @@ const N = 20000;
 let hiE = 0,
   hiF = 0,
   hiM = 0,
+  rawE = 0,
+  rawF = 0,
   pinOld = 0,
   pinNew = 0;
 for (let i = 0; i < N; i++) {
@@ -105,6 +129,8 @@ for (let i = 0; i < N; i++) {
   ) as Answers;
   const raw = computeVisibleAxes(judge(a).percent);
   const sc = scaleVisibleAxes(raw);
+  if (raw.energy > 57) rawE++;
+  if (raw.flow > 57) rawF++;
   if (sc.energy > 57) hiE++;
   if (sc.flow > 57) hiF++;
   if (sc.moisture > 57) hiM++;
@@ -112,9 +138,9 @@ for (let i = 0; i < N; i++) {
   if ([sc.energy, sc.flow, sc.moisture].some((v) => v === 0 || v === 100)) pinNew++;
 }
 const pc = (n: number) => `${((n / N) * 100).toFixed(0)}%`;
-check("エネルギーが右寄りに偏らない", hiE / N < 0.6, `${pc(hiE)} (現行99%)`);
-check("流れが右寄りに偏らない", hiF / N < 0.6, `${pc(hiF)} (現行94%)`);
-check("うるおいが右寄りに偏らない", hiM / N < 0.6, `${pc(hiM)} (現行95%)`);
+check("エネルギーが右寄りに偏らない", hiE / N < 0.6, `${pc(hiE)} (スケール前 ${pc(rawE)})`);
+check("流れが右寄りに偏らない", hiF / N < 0.6, `${pc(hiF)} (スケール前 ${pc(rawF)})`);
+check("うるおいが右寄りに偏らない", hiM / N < 0.6, `${pc(hiM)} (双方向軸のため正規化なし)`);
 check("端への張り付きが減る", pinNew < pinOld, `${pc(pinOld)} → ${pc(pinNew)}`);
 
 console.log(ng === 0 ? "\n==== 総合: 全項目パス ====" : `\n==== 総合: ${ng}件 NG ====`);

@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { RESULT_TYPES, getResultTypeById } from "@/data/resultTypes";
-import { decodeAnswers, evaluateAnswers, determineType } from "@/data/scoring";
+import { decodeAnswers, evaluateAnswers, determineType, signalCounts } from "@/data/scoring";
 import { AxisMeter } from "@/components/AxisMeter";
 import { ShareActions } from "@/components/ShareActions";
 import { TypeHighlight } from "@/components/TypeHighlight";
-import { SCORED_TYPES } from "@/data/typeDefs";
+import { SCORED_TYPES, SIGNAL_CAPACITY } from "@/data/typeDefs";
 import { scaleVisibleAxes } from "@/data/axisScale";
 
 interface Props {
@@ -63,6 +63,14 @@ export default async function ResultPage({ params, searchParams }: Props) {
   const primary = SCORED_TYPES.find((t) => t.id === type.id)?.primary;
   const primaryPercent = result && primary ? result.percent[primary] : null;
 
+  // シグナル主導タイプ（02/12/13/14）の強さ。そのタイプ固有の設問が何割当てはまったか。
+  // 判定はすでに judge() が済ませていて、ここは表示のために読むだけ。
+  const signalCapacity = SIGNAL_CAPACITY[type.id] ?? 0;
+  const signalPercent =
+    answers && signalCapacity > 0
+      ? Math.round(((signalCounts(answers)[type.id] ?? 0) / signalCapacity) * 100)
+      : null;
+
   // メーターは「同じ診断を受けた人の中での位置」で見せる。
   // 生の値のままだと、ほとんどの人が3本とも右寄り(HIGH/FLOW/WET)になり、
   // タイプ名と矛盾して見えてしまう。温度だけは50が正しい中立点なので変換しない。
@@ -91,6 +99,7 @@ export default async function ResultPage({ params, searchParams }: Props) {
           typeId={type.id}
           color={type.color}
           primaryPercent={primaryPercent}
+          signalPercent={result ? signalPercent : null}
           metersShown={result !== null}
         />
 
@@ -98,42 +107,42 @@ export default async function ResultPage({ params, searchParams }: Props) {
           <div className="mt-5 rounded-[28px] bg-white p-6 shadow-[var(--card-shadow)]">
             <h2 className="text-sm font-bold text-ink-soft">あなたの4つの軸</h2>
             <p className="mb-4 mt-1.5 text-[0.7rem] leading-relaxed text-ink-soft">
-              これは点数ではありません。同じ診断を受けた人とくらべて、カラダのクセがどちら寄りかを表しています。右と左に優劣はありません。
+              これは点数ではありません。カラダのクセが、どちらの方向に出やすいかを表しています。どちらが良い・悪いというものでもありません。
             </p>
             <div className="flex flex-col gap-4">
               <AxisMeter
                 name="エネルギー"
-                leftIcon="🪫"
-                leftLabel="LOW"
+                leftIcon="🔌"
+                leftLabel="こまめ補給"
                 rightIcon="🔋"
-                rightLabel="HIGH"
+                rightLabel="長もち"
                 value={meters.energy}
                 color={type.color}
               />
               <AxisMeter
                 name="流れ"
                 leftIcon="🚦"
-                leftLabel="STUCK"
-                rightIcon="🌪️"
-                rightLabel="FLOW"
+                leftLabel="ぎゅっと"
+                rightIcon="🌊"
+                rightLabel="すいすい"
                 value={meters.flow}
                 color={type.color}
               />
               <AxisMeter
                 name="温度"
                 leftIcon="🧊"
-                leftLabel="COOL"
+                leftLabel="ひんやり"
                 rightIcon="🔥"
-                rightLabel="HOT"
+                rightLabel="ほてり"
                 value={meters.temperature}
                 color={type.color}
               />
               <AxisMeter
-                name="うるおい"
+                name="水分"
                 leftIcon="🏜️"
-                leftLabel="DRY"
+                leftLabel="カラカラ"
                 rightIcon="💧"
-                rightLabel="WET"
+                rightLabel="たぷたぷ"
                 value={meters.moisture}
                 color={type.color}
               />

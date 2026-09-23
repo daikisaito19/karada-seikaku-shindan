@@ -44,8 +44,19 @@ export type HighlightKind = "axis" | "signal" | "variability" | "mix";
 
 export interface TypeHighlight {
   kind: HighlightKind;
-  /** kind === "axis" のときだけ使う。ピップの上に出る短いラベル */
+  /**
+   * kind === "axis" のときのピップのラベル。
+   * 既定は AXIS_DISPLAY_NAME[primary] だが、同じ軸を共有するタイプ（08と11はどちらもST）は
+   * 見出しまで同じになってしまうので、ここでタイプごとに具体化する。
+   */
   axisLabel?: string;
+  /**
+   * kind === "signal" のときのピップのラベル。
+   * これらのタイプは primary軸の値が低く（13スロースタートは QI=10%）、
+   * 軸の強さを出すとタイプ名と矛盾する。代わりに、そのタイプ固有の設問が
+   * いくつ当てはまったか（シグナル充足率）を同じ5段階で見せる。
+   */
+  signalLabel?: string;
   /** 1〜2文。既存のlead/features/cautions/chargesとは重複させない */
   note: string;
 }
@@ -64,6 +75,7 @@ export const TYPE_HIGHLIGHTS: Record<string, TypeHighlight> = {
   },
   "denchi-gire": {
     kind: "signal",
+    signalLabel: "使い切るタイミング",
     note: "午後から夕方にかけて、その日の分を使い切っていく。そのタイミングを示す回答がそろいました。",
   },
   "shokugo-sleep": {
@@ -93,7 +105,9 @@ export const TYPE_HIGHLIGHTS: Record<string, TypeHighlight> = {
   },
   "ira-ira": {
     kind: "axis",
-    axisLabel: AXIS_DISPLAY_NAME.ST,
+    // 11頭ぐるぐると同じST軸。見出しが同じだと「なぜこのタイプか」が区別できないので、
+    // 軸そのものではなく「どこに出るか」まで書く
+    axisLabel: "ストレスの出かた：カラダ側",
     note: "同じストレスでも、あなたの場合は体の張りとして先に出やすい。そこが決め手になりました。",
   },
   "uruoi-busoku": {
@@ -108,19 +122,23 @@ export const TYPE_HIGHLIGHTS: Record<string, TypeHighlight> = {
   },
   "atama-guruguru": {
     kind: "axis",
-    axisLabel: AXIS_DISPLAY_NAME.ST,
+    // 08イライラ充満と同じST軸。出る場所で区別する
+    axisLabel: "ストレスの出かた：アタマ側",
     note: "同じストレスでも、あなたの場合は考えごとのループとして先に出やすい。そこが決め手になりました。",
   },
   "yagata-switch": {
     kind: "signal",
+    signalLabel: "夜のスイッチ",
     note: "夜になるほどスイッチが入る。時間帯の使い方を示す回答がそろいました。",
   },
   "slow-start": {
     kind: "signal",
+    signalLabel: "動き出しまでのサイン",
     note: "動き出すまでの重さに回答が集中しました。元気の量というより、立ち上がりの時間の話です。",
   },
   "tsune-accel": {
     kind: "signal",
+    signalLabel: "止まらないサイン",
     note: "止まっている時間が短い。オフに切り替える場面を示す回答がそろいました。",
   },
   "nami-nori": {
@@ -133,7 +151,11 @@ export const TYPE_HIGHLIGHTS: Record<string, TypeHighlight> = {
   },
 };
 
-/** 0-100の軸スコアを、点数に見えない5段階の傾向に変換する */
+/**
+ * 0-100の値を、点数に見えない5段階の傾向に変換する。
+ * 軸スコアにもシグナル充足率にも同じものさしを使うので、
+ * 軸主導タイプとシグナル主導タイプでピップの見え方が揃う。
+ */
 export interface AxisStrength {
   /** 1〜5。ピップの点灯数 */
   level: number;

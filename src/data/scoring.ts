@@ -115,20 +115,31 @@ export interface VisibleAxes {
 
 /**
  * 内部9軸を、ユーザーに見せる4軸メーターに変換する。
- * 気虚(QI)などの「不足」系スコアは値が高いほど不調寄りなので、表示軸では反転させている。
+ * 表示専用。judge() はこの関数を呼ばないので、ここを変えてもタイプ判定は変わらない。
  *
- * うるおいは BL(材料不足) と JIN(うるおい不足) の平均を反転させる。
- * 旧8軸では JIN がなく YIN を使っていたため、
- * 「熱がこもっている人」が乾燥側に、「乾燥している人」が潤っている側に表示されていた。
- * YIN は温度メーター専任とし、うるおいメーターには使わない。
+ * 参照する軸は、判定側の AXIS_FAMILY（typeDefs.ts）に合わせてある。
+ *   エネルギー = QI, BL   / 流れ = ST, STA / 温度 = YANG, YIN / うるおい = DAM, JIN
+ * 以前は BL が「うるおい」に入っていたため、材料不足のタイプ（10めぐり不足）が
+ * 乾燥タイプ（09うるおい不足）と同じ見た目になり、
+ * エネルギーの方は QI しか見ないので「かなりHIGH寄り」と出ていた。
+ *
+ * 「不足」系の軸（QI/BL, ST/STA）は値が高いほど不調寄りなので反転させる。
+ * 同じ系統の2軸は平均ではなく max をとる。平均だと、片方だけが強く出ている人の
+ * 特徴が半分に薄まってしまうため。
+ *
+ * 温度とうるおいは、対立する2軸の差をとる双方向軸で、50が中立点になる。
+ *   温度     = 熱がこもる(YIN) ←→ 冷える(YANG)
+ *   うるおい = 溜め込む(DAM)   ←→ 乾く(JIN)
+ * SP(脾気虚) はどの表示軸にも入らない。4軸に出ない特徴は
+ * 結果ページの「このタイプの決め手」ブロックが担当する。
  */
 export function computeVisibleAxes(percent: AxisScores): VisibleAxes {
   const clamp = (n: number) => Math.max(0, Math.min(100, Math.round(n)));
   return {
-    energy: clamp(100 - percent.QI),
-    flow: clamp(100 - (percent.ST + percent.STA) / 2),
+    energy: clamp(100 - Math.max(percent.QI, percent.BL)),
+    flow: clamp(100 - Math.max(percent.ST, percent.STA)),
     temperature: clamp(50 + (percent.YIN - percent.YANG) / 2),
-    moisture: clamp(100 - (percent.BL + percent.JIN) / 2),
+    moisture: clamp(50 + (percent.DAM - percent.JIN) / 2),
   };
 }
 
