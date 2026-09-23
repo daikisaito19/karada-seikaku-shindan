@@ -7,6 +7,7 @@ import { AxisMeter } from "@/components/AxisMeter";
 import { ShareActions } from "@/components/ShareActions";
 import { TypeHighlight } from "@/components/TypeHighlight";
 import { SCORED_TYPES } from "@/data/typeDefs";
+import { scaleVisibleAxes } from "@/data/axisScale";
 
 interface Props {
   params: Promise<{ type: string }>;
@@ -62,6 +63,11 @@ export default async function ResultPage({ params, searchParams }: Props) {
   const primary = SCORED_TYPES.find((t) => t.id === type.id)?.primary;
   const primaryPercent = result && primary ? result.percent[primary] : null;
 
+  // メーターは「同じ診断を受けた人の中での位置」で見せる。
+  // 生の値のままだと、ほとんどの人が3本とも右寄り(HIGH/FLOW/WET)になり、
+  // タイプ名と矛盾して見えてしまう。温度だけは50が正しい中立点なので変換しない。
+  const meters = result ? scaleVisibleAxes(result.visible) : null;
+
   return (
     <main className="flex flex-1 flex-col items-center px-4 py-10 sm:py-14">
       <div className="w-full max-w-lg">
@@ -81,9 +87,19 @@ export default async function ResultPage({ params, searchParams }: Props) {
           </p>
         </div>
 
-        {result && (
+        <TypeHighlight
+          typeId={type.id}
+          color={type.color}
+          primaryPercent={primaryPercent}
+          metersShown={result !== null}
+        />
+
+        {result && meters && (
           <div className="mt-5 rounded-[28px] bg-white p-6 shadow-[var(--card-shadow)]">
-            <h2 className="mb-4 text-sm font-bold text-ink-soft">あなたの4つの軸</h2>
+            <h2 className="text-sm font-bold text-ink-soft">あなたの4つの軸</h2>
+            <p className="mb-4 mt-1.5 text-[0.7rem] leading-relaxed text-ink-soft">
+              これは点数ではありません。同じ診断を受けた人とくらべて、カラダのクセがどちら寄りかを表しています。右と左に優劣はありません。
+            </p>
             <div className="flex flex-col gap-4">
               <AxisMeter
                 name="エネルギー"
@@ -91,7 +107,7 @@ export default async function ResultPage({ params, searchParams }: Props) {
                 leftLabel="LOW"
                 rightIcon="🔋"
                 rightLabel="HIGH"
-                value={result.visible.energy}
+                value={meters.energy}
                 color={type.color}
               />
               <AxisMeter
@@ -100,7 +116,7 @@ export default async function ResultPage({ params, searchParams }: Props) {
                 leftLabel="STUCK"
                 rightIcon="🌪️"
                 rightLabel="FLOW"
-                value={result.visible.flow}
+                value={meters.flow}
                 color={type.color}
               />
               <AxisMeter
@@ -109,7 +125,7 @@ export default async function ResultPage({ params, searchParams }: Props) {
                 leftLabel="COOL"
                 rightIcon="🔥"
                 rightLabel="HOT"
-                value={result.visible.temperature}
+                value={meters.temperature}
                 color={type.color}
               />
               <AxisMeter
@@ -118,13 +134,10 @@ export default async function ResultPage({ params, searchParams }: Props) {
                 leftLabel="DRY"
                 rightIcon="💧"
                 rightLabel="WET"
-                value={result.visible.moisture}
+                value={meters.moisture}
                 color={type.color}
               />
             </div>
-            <p className="mt-4 text-center text-[0.7rem] leading-relaxed text-ink-soft">
-              これは良し悪しの点数ではなく、カラダのクセの方向を表しています。
-            </p>
           </div>
         )}
 
@@ -133,13 +146,6 @@ export default async function ResultPage({ params, searchParams }: Props) {
             このリンクは共有された結果ページです。あなた自身の4軸グラフを見るには、診断を受けてみてください。
           </div>
         )}
-
-        <TypeHighlight
-          typeId={type.id}
-          color={type.color}
-          primaryPercent={primaryPercent}
-          metersShown={result !== null}
-        />
 
         <div className="mt-5 grid grid-cols-1 gap-4">
           <ResultBox title="✨ あなたの特徴" items={type.features} tone="good" />
