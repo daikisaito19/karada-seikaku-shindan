@@ -65,14 +65,23 @@ export default function Home() {
           医療行為・医学的診断を行うものではありません。
         </p>
 
-        <footer className="mt-6 flex justify-center gap-4 text-xs text-ink-soft">
-          <Link href="/about" className="underline underline-offset-2">
+        <footer className="mt-4 flex flex-wrap items-center justify-center gap-x-2 text-xs text-ink-soft">
+          <Link
+            href="/about"
+            className="inline-flex min-h-[44px] items-center px-2 underline underline-offset-2"
+          >
             この診断について
           </Link>
-          <Link href="/privacy" className="underline underline-offset-2">
+          <Link
+            href="/privacy"
+            className="inline-flex min-h-[44px] items-center px-2 underline underline-offset-2"
+          >
             プライバシーポリシー
           </Link>
-          <Link href="/terms" className="underline underline-offset-2">
+          <Link
+            href="/terms"
+            className="inline-flex min-h-[44px] items-center px-2 underline underline-offset-2"
+          >
             利用規約
           </Link>
         </footer>

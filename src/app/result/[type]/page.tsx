@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { RESULT_TYPES, getResultTypeById } from "@/data/resultTypes";
 import { decodeAnswers, evaluateAnswers, determineType } from "@/data/scoring";
 import { AxisMeter } from "@/components/AxisMeter";
-import { ShareCopyButton } from "@/components/ShareCopyButton";
+import { ShareActions } from "@/components/ShareActions";
 
 interface Props {
   params: Promise<{ type: string }>;
@@ -41,8 +41,6 @@ export default async function ResultPage({ params, searchParams }: Props) {
   const answers = decodeAnswers(a);
   const personalized = answers && determineType(answers).id === type.id;
   const result = personalized ? evaluateAnswers(answers!) : null;
-
-  const shareText = `【カラダ性格診断】\n私は「${type.emoji} ${type.name}」でした！\n${type.catchCopy}\n\nhttps://karada-seikaku-shindan.vercel.app/result/${type.id}`;
 
   return (
     <main className="flex flex-1 flex-col items-center px-4 py-10 sm:py-14">
@@ -128,17 +126,18 @@ export default async function ResultPage({ params, searchParams }: Props) {
           この診断は医療行為・医学的診断を行うものではありません。
         </p>
 
-        <div className="mt-6 flex flex-col gap-2.5">
-          <ShareCopyButton text={shareText} />
+        <ShareActions emoji={type.emoji} typeName={type.name} />
+
+        <div className="mt-4 flex flex-col gap-2.5">
           <Link
             href="/diagnosis"
-            className="w-full rounded-2xl bg-gradient-to-r from-[#ff9ecb] to-accent px-4 py-3.5 text-center text-sm font-bold text-white transition active:scale-[0.98]"
+            className="flex min-h-[48px] w-full items-center justify-center rounded-2xl border-2 border-accent bg-white px-4 text-sm font-bold text-accent transition active:scale-[0.98]"
           >
             もう一度診断する
           </Link>
           <Link
             href="/"
-            className="w-full py-2 text-center text-xs text-ink-soft underline underline-offset-2"
+            className="flex min-h-[44px] w-full items-center justify-center text-xs text-ink-soft underline underline-offset-2"
           >
             トップに戻る
           </Link>

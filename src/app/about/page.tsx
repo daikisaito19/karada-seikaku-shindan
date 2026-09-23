@@ -37,7 +37,7 @@ export default function AboutPage() {
 
         <Link
           href="/"
-          className="mt-8 inline-block text-xs text-ink-soft underline underline-offset-2"
+          className="mt-6 inline-flex min-h-[44px] items-center px-2 text-xs text-ink-soft underline underline-offset-2"
         >
           トップに戻る
         </Link>
