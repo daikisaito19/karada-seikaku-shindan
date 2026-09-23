@@ -6,6 +6,7 @@ import { decodeAnswers, evaluateAnswers, determineType, signalCounts } from "@/d
 import { AxisMeter } from "@/components/AxisMeter";
 import { ShareActions } from "@/components/ShareActions";
 import { TypeHighlight } from "@/components/TypeHighlight";
+import { ResultViewTracker, RestartLink } from "@/components/ResultTracking";
 import { SCORED_TYPES, SIGNAL_CAPACITY } from "@/data/typeDefs";
 import { scaleVisibleAxes } from "@/data/axisScale";
 
@@ -32,6 +33,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
+    // ?a= 付きURLは回答を復元するためのもので、中身はスラッグ側と同じ。
+    // 共有されるたびに別URLが増えるので、正規URLはスラッグ側だと明示する
+    alternates: { canonical: `/result/${type.id}` },
     openGraph: {
       title: `${title}｜カラダ性格診断`,
       description,
@@ -79,6 +83,9 @@ export default async function ResultPage({ params, searchParams }: Props) {
   return (
     <main className="flex flex-1 flex-col items-center px-4 py-10 sm:py-14">
       <div className="w-full max-w-lg">
+        {/* 表示だけを記録する。?a= の中身は渡していない */}
+        <ResultViewTracker typeId={type.id} personalized={result !== null} />
+
         <div
           className="animate-pop-in rounded-[28px] p-7 shadow-[var(--card-shadow)]"
           style={{ backgroundColor: type.bg }}
@@ -171,12 +178,12 @@ export default async function ResultPage({ params, searchParams }: Props) {
         <ShareActions emoji={type.emoji} typeName={type.name} />
 
         <div className="mt-4 flex flex-col gap-2.5">
-          <Link
+          <RestartLink
             href="/diagnosis"
             className="flex min-h-[48px] w-full items-center justify-center rounded-2xl border-2 border-accent bg-white px-4 text-sm font-bold text-accent transition active:scale-[0.98]"
           >
             もう一度診断する
-          </Link>
+          </RestartLink>
           <Link
             href="/"
             className="flex min-h-[44px] w-full items-center justify-center text-xs text-ink-soft underline underline-offset-2"

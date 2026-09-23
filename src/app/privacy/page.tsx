@@ -3,6 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "プライバシーポリシー",
+  alternates: { canonical: "/privacy" },
 };
 
 export default function PrivacyPage() {
@@ -15,14 +16,49 @@ export default function PrivacyPage() {
           <section>
             <h2 className="mb-1.5 font-bold">取得する情報について</h2>
             <p>
-              本サービス「カラダ性格診断」（以下「本サービス」）は、現在のバージョンにおいて、氏名・メールアドレスなどの個人情報の入力や会員登録を必要としません。診断の回答内容は、お使いの端末上で処理され、結果ページのURLの一部として利用されます。回答内容や診断結果を、運営者がサーバー上で個人と紐づけて保存することはありません。
+              本サービス「カラダ性格診断」（以下「本サービス」）は、氏名・メールアドレスなどの個人情報の入力や会員登録を必要としません。診断の回答は、お使いの端末（ブラウザ）の中だけで処理され、回答内容や診断結果を、運営者がサーバー上で個人と紐づけて保存することはありません。
+            </p>
+          </section>
+
+          <section>
+            <h2 className="mb-1.5 font-bold">端末に保存される情報</h2>
+            <p>
+              診断の途中経過（何問目まで進んだか、そこまでの回答）を、お使いのブラウザの localStorage
+              に一時的に保存します。これは、途中で画面を閉じたり再読み込みしたりしたあとに、続きから再開できるようにするためのものです。この情報が運営者のサーバーへ送信されることはありません。
+            </p>
+            <p className="mt-2">
+              保存された途中経過は、<strong className="font-bold">30問すべてに回答し終えたとき</strong>、または
+              <strong className="font-bold">トップページから新しく診断を始めたとき</strong>に削除されます。
+            </p>
+            <p className="mt-2">なお、本サービスはCookieを使用していません。</p>
+          </section>
+
+          <section>
+            <h2 className="mb-1.5 font-bold">結果ページのURLについて</h2>
+            <p>
+              診断結果のURLには、あなたの回答が <code className="font-bold">?a=</code>{" "}
+              という形で含まれています。これは、あとからもう一度同じ結果を開いたり、友人に結果を見せたりするためのものです。この仕組みのおかげで、運営者が回答をサーバーに保存しなくても結果を再現できます。
+            </p>
+            <p className="mt-2">
+              そのため、
+              <strong className="font-bold">
+                このURLを誰かに共有すると、30問の回答内容もあわせて共有されます。
+              </strong>
+              知られたくない内容が含まれる場合は、共有をお控えください。
             </p>
           </section>
 
           <section>
             <h2 className="mb-1.5 font-bold">アクセス解析について</h2>
             <p>
-              本サービスは、サイトの利用状況を把握するために、アクセス解析ツールを利用する場合があります。これらのツールは、個人を特定しない形で、閲覧ページやアクセス日時などの情報を収集することがあります。
+              本サービスは、どのページがどれくらい見られているかを把握するために、Vercel Web Analytics
+              を利用します。このツールはCookieを使用せず、個人を特定できる情報を収集しません。取得するのは、閲覧されたページのパス、アクセス日時、おおまかな地域・端末種別といった統計情報です。
+            </p>
+            <p className="mt-2">
+              <strong className="font-bold">
+                30問の回答内容や、結果URLに含まれる <code>?a=</code> の文字列を送信することはありません。
+              </strong>
+              また、端末をまたいで個人を追跡することもありません。
             </p>
           </section>
 
@@ -33,12 +69,24 @@ export default function PrivacyPage() {
             </p>
           </section>
 
-          <section>
-            <h2 className="mb-1.5 font-bold">お問い合わせ</h2>
-            <p>本サービスに関するお問い合わせは、運営者までご連絡ください。</p>
+          <section id="contact" className="scroll-mt-6">
+            <h2 className="mb-1.5 font-bold">運営者情報・お問い合わせ</h2>
+            <p>運営者：【運営者名を入力してください】</p>
+            <p className="mt-1">
+              お問い合わせ：
+              <a
+                href="mailto:【メールアドレスを入力してください】"
+                className="inline-flex min-h-[44px] items-center text-accent underline underline-offset-2"
+              >
+                【メールアドレスを入力してください】
+              </a>
+            </p>
+            <p className="mt-2">
+              本サービスの内容・本ポリシーに関するご連絡は、上記のメールアドレスまでお願いします。
+            </p>
           </section>
 
-          <p className="text-xs text-ink-soft">制定日：2026年9月20日</p>
+          <p className="text-xs text-ink-soft">制定日：2026年9月20日／最終更新日：2026年9月23日</p>
         </div>
 
         <Link

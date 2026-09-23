@@ -4,6 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "この診断について",
   description: "カラダ性格診断のコンセプトと使い方について。",
+  alternates: { canonical: "/about" },
 };
 
 export default function AboutPage() {

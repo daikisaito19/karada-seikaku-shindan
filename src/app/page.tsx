@@ -84,6 +84,12 @@ export default function Home() {
           >
             利用規約
           </Link>
+          <Link
+            href="/privacy#contact"
+            className="inline-flex min-h-[44px] items-center px-2 underline underline-offset-2"
+          >
+            お問い合わせ
+          </Link>
         </footer>
       </div>
     </main>

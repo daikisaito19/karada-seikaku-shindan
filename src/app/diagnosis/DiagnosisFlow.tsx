@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { QUESTIONS, type OptionKey } from "@/data/questions";
 import { evaluateAnswers, encodeAnswers } from "@/data/scoring";
+import { trackEvent, type ProgressStep } from "@/lib/analytics";
 
 const TOTAL = QUESTIONS.length;
 const STORAGE_KEY = "karada-shindan:progress:v1";
@@ -102,8 +103,10 @@ const progressStore = (() => {
      * マウント時に1回だけ呼ぶ。
      * ?q= 付きで来た = リロード／タブ復帰 なので保存済みの回答から復元する。
      * ?q= なしで来た = 新しく始める ので、前回の中断データは持ち越さない。
+     *
+     * 戻り値の resumed は「途中から再開したかどうか」。計測でしか使わない。
      */
-    init() {
+    init(): { resumed: boolean } {
       const q = readQuestionParam(window.location.search);
       if (q === null) {
         answers = [];
@@ -117,6 +120,7 @@ const progressStore = (() => {
       initialized = true;
       snapshot = UNINITIALIZED;
       refresh();
+      return { resumed: answers.length > 0 };
     },
 
     /** 画面から離れたら未初期化に戻す。次のマウントで古い状態が一瞬見えるのを防ぐ */
@@ -152,8 +156,13 @@ function parseSnapshot(snapshot: string): { q: number; answers: OptionKey[] } | 
   return { q: Number(q), answers: answers.split("") as OptionKey[] };
 }
 
+/** 進捗を送る節目。全30問のうちこの5点だけを見る */
+const PROGRESS_STEPS: ProgressStep[] = [5, 10, 15, 20, 25];
+
 export function DiagnosisFlow() {
   const router = useRouter();
+  // 戻って選び直したときに同じ節目を二重送信しないよう、送信済みを覚えておく
+  const sentSteps = useRef<Set<ProgressStep>>(new Set());
   const snapshot = useSyncExternalStore(
     progressStore.subscribe,
     progressStore.getSnapshot,
@@ -161,7 +170,9 @@ export function DiagnosisFlow() {
   );
 
   useEffect(() => {
-    progressStore.init();
+    // 依存が空なので、再レンダーでは動かない（マウント1回につき1件）
+    const { resumed } = progressStore.init();
+    trackEvent("diagnosis_start", { resumed });
     return () => progressStore.teardown();
   }, []);
 
@@ -170,6 +181,14 @@ export function DiagnosisFlow() {
 
   const handleSelect = useCallback(
     (index: number, key: OptionKey) => {
+      // 送るのは「何問目まで進んだか」だけ。何を選んだかは送らない
+      const answered = index + 1;
+      const step = PROGRESS_STEPS.find((s) => s === answered);
+      if (step !== undefined && !sentSteps.current.has(step)) {
+        sentSteps.current.add(step);
+        trackEvent("question_progress", { step });
+      }
+
       if (index < TOTAL - 1) {
         progressStore.answer(index, key);
         return;
@@ -179,6 +198,7 @@ export function DiagnosisFlow() {
       final[index] = key;
       if (final.length !== TOTAL || final.some((a) => !a)) return; // 念のため
       progressStore.complete();
+      trackEvent("diagnosis_complete");
       const result = evaluateAnswers(final);
       router.push(`/result/${result.type.id}?a=${encodeAnswers(final)}`);
     },
@@ -208,7 +228,14 @@ export function DiagnosisFlow() {
 
   return (
     <div className="w-full max-w-lg">
-      <div className="mb-4 h-2 w-full overflow-hidden rounded-full bg-black/5">
+      <div
+        className="mb-4 h-2 w-full overflow-hidden rounded-full bg-black/5"
+        role="progressbar"
+        aria-valuenow={qIndex + 1}
+        aria-valuemin={1}
+        aria-valuemax={TOTAL}
+        aria-label="診断の進捗"
+      >
         <div
           className="h-full rounded-full bg-accent transition-[width] duration-300 ease-out"
           style={{ width: `${progress}%` }}
@@ -229,7 +256,11 @@ export function DiagnosisFlow() {
             </button>
           )}
         </div>
-        <p className="mb-6 text-lg font-bold leading-relaxed">{question.text}</p>
+        {/* 設問が切り替わったことを支援技術に伝える。
+            カード全体に付けると選択肢4つまで毎回読み上げられて冗長になるので、設問文だけにしている */}
+        <p aria-live="polite" className="mb-6 text-lg font-bold leading-relaxed">
+          {question.text}
+        </p>
         <div className="flex flex-col gap-2.5">
           {question.options.map((opt) => {
             const isSelected = selected === opt.key;

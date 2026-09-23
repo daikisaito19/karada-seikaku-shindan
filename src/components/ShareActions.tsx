@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
+import { trackEvent } from "@/lib/analytics";
 
 interface ShareActionsProps {
   emoji: string;
@@ -49,9 +50,12 @@ export function ShareActions({ emoji, typeName }: ShareActionsProps) {
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
+      // 記録するのは成否だけ。コピーしたURLは渡さない
+      trackEvent("share_copy", { ok: true });
       notify("copied");
     } catch {
       // クリップボードが使えない環境では手動コピー用に中身を見せる
+      trackEvent("share_copy", { ok: false });
       notify("failed");
       window.prompt("コピーできませんでした。手動でコピーしてください:", text);
     }
@@ -62,6 +66,7 @@ export function ShareActions({ emoji, typeName }: ShareActionsProps) {
     if (canNativeShare) {
       try {
         await navigator.share({ title, text: shareText, url: current });
+        trackEvent("share_click", { method: "native" });
         return;
       } catch {
         // 共有シートを閉じただけの場合もここに来るので、何も出さずに終わる
@@ -94,7 +99,11 @@ export function ShareActions({ emoji, typeName }: ShareActionsProps) {
           aria-label="Xでシェアする"
           className={iconButton}
           onClick={(e) => {
-            if (!xUrl) e.preventDefault();
+            if (!xUrl) {
+              e.preventDefault();
+              return;
+            }
+            trackEvent("share_click", { method: "x" });
           }}
         >
           <span aria-hidden>𝕏</span>
@@ -107,7 +116,11 @@ export function ShareActions({ emoji, typeName }: ShareActionsProps) {
           aria-label="LINEでシェアする"
           className={iconButton}
           onClick={(e) => {
-            if (!lineUrl) e.preventDefault();
+            if (!lineUrl) {
+              e.preventDefault();
+              return;
+            }
+            trackEvent("share_click", { method: "line" });
           }}
         >
           <span aria-hidden>💬</span>

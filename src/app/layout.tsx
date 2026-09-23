@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Zen_Maru_Gothic } from "next/font/google";
 import "./globals.css";
 import { SITE_URL } from "@/lib/siteUrl";
+import { SiteAnalytics } from "@/components/SiteAnalytics";
 
 const zenMaru = Zen_Maru_Gothic({
   variable: "--font-zen-maru",
@@ -12,6 +13,9 @@ const zenMaru = Zen_Maru_Gothic({
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
+  // 各ページが自分の canonical を明示する。子の alternates は親を丸ごと置き換えるので、
+  // ここだけに書いても結果ページには効かない（twitter.card が落ちたのと同じ構造）
+  alternates: { canonical: "/" },
   title: {
     default: "カラダ性格診断",
     template: "%s | カラダ性格診断",
@@ -38,6 +42,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="ja" className={`${zenMaru.variable} h-full`}>
       <body className="min-h-full flex flex-col bg-[var(--bg-grad)] text-[var(--text)] antialiased">
         {children}
+        <SiteAnalytics />
       </body>
     </html>
   );
