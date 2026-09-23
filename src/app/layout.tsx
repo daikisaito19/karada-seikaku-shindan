@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Zen_Maru_Gothic } from "next/font/google";
 import "./globals.css";
+import { SITE_URL } from "@/lib/siteUrl";
 
 const zenMaru = Zen_Maru_Gothic({
   variable: "--font-zen-maru",
@@ -10,7 +11,7 @@ const zenMaru = Zen_Maru_Gothic({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://karada-seikaku-shindan.vercel.app"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "カラダ性格診断",
     template: "%s | カラダ性格診断",
@@ -22,6 +23,8 @@ export const metadata: Metadata = {
     description: "30問でわかる、あなたの「カラダのクセ」。",
     type: "website",
     locale: "ja_JP",
+    siteName: "カラダ性格診断",
+    url: "/",
   },
   twitter: {
     card: "summary_large_image",

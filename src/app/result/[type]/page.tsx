@@ -23,11 +23,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = `${type.emoji} ${type.name}タイプ`;
   const description = `${type.catchCopy} カラダ性格診断であなたのタイプをチェック。`;
 
+  // openGraph / twitter はオブジェクトごと親layoutを置き換えるので、
+  // card や type などの共通項目もここで明示しないと失われる
+  // （以前は twitter.card が落ちて summary に降格していた）
   return {
     title,
     description,
-    openGraph: { title: `${title}｜カラダ性格診断`, description },
-    twitter: { title: `${title}｜カラダ性格診断`, description },
+    openGraph: {
+      title: `${title}｜カラダ性格診断`,
+      description,
+      type: "website",
+      locale: "ja_JP",
+      siteName: "カラダ性格診断",
+      url: `/result/${type.id}`,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title}｜カラダ性格診断`,
+      description,
+    },
   };
 }
 
