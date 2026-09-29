@@ -59,7 +59,7 @@ export default async function Image({ params }: { params: Promise<{ type: string
               justifyContent: "space-between",
             }}
           >
-            <div style={{ display: "flex", fontSize: 24, fontWeight: 700, color: "#8a7d99" }}>
+            <div style={{ display: "flex", fontSize: 24, fontWeight: 700, color: "#6d607b" }}>
               カラダ性格診断
             </div>
             <div
@@ -112,7 +112,7 @@ export default async function Image({ params }: { params: Promise<{ type: string
           <div style={{ display: "flex", fontSize: 30, fontWeight: 900, color: "#4a3f55" }}>
             あなたのカラダには、性格がある。
           </div>
-          <div style={{ display: "flex", fontSize: 21, fontWeight: 700, color: "#8a7d99", marginTop: 6 }}>
+          <div style={{ display: "flex", fontSize: 21, fontWeight: 700, color: "#6d607b", marginTop: 6 }}>
             30問でわかる、あなたの「カラダのクセ」。
           </div>
         </div>

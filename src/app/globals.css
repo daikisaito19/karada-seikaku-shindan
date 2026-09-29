@@ -2,9 +2,22 @@
 
 :root {
   --text: #4a3f55;
-  --text-soft: #8a7d99;
-  --accent: #9b5de5;
+  /* 補足テキスト。以前の #8a7d99 は白地で 3.84:1 しかなく、
+     10〜12pxで使っている箇所（メーターの左右ラベル、フッター、注意書き）が
+     WCAG AAの4.5:1に届いていなかったので、色味を保ったまま濃くしてある。
+     最も明るいタイプカード(#FFF3D6)上でも 5.28:1、最も濃い(#FFE1E1)上でも 4.74:1。 */
+  --text-soft: #6d607b;
+  /* ブランドの紫。見出し・リンク・ボタンの文字色に使うので、
+     白カード(6.60:1)・ページ背景・--accent-light(5.27:1) のどれに乗せても
+     WCAG AAの4.5:1を満たす濃さにしてある。以前の #9b5de5 は白地で 4.13:1 だった。 */
+  --accent: #7a35c9;
   --accent-light: #ede1fb;
+  /* 白抜き文字を載せるCTA用グラデーション。
+     以前の淡いピンク(#ff9ecb)では白文字が 1.91:1 しかなく、主要ボタンが読みにくかった。
+     この2色なら全域で 4.64〜6.60:1 を確保できる。
+     終点は --accent と同じ紫。--accent を薄くするとここも基準割れするので注意。 */
+  --cta-from: #c93f83;
+  --cta-to: var(--accent);
   --bg-grad: linear-gradient(160deg, #fff6e9, #fdebff);
   --card-shadow: 0 12px 30px rgba(120, 90, 160, 0.15);
 }
@@ -15,6 +28,8 @@
   --color-ink-soft: var(--text-soft);
   --color-accent: var(--accent);
   --color-accent-light: var(--accent-light);
+  --color-cta-from: var(--cta-from);
+  --color-cta-to: var(--cta-to);
 }
 
 body {
@@ -34,4 +49,17 @@ body {
 
 .animate-pop-in {
   animation: pop-in 0.35s ease;
+}
+
+/* 動きを減らす設定の人には、アニメーションと変化のトランジションを止める。
+   結果カードのポップインと進捗バーの伸びが対象。表示される内容は変わらない。 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

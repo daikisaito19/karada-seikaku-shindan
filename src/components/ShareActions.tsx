@@ -86,7 +86,7 @@ export function ShareActions({ emoji, typeName }: ShareActionsProps) {
 
       <button
         onClick={handleShare}
-        className="flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-gradient-to-r from-[#ff9ecb] to-accent px-4 text-sm font-bold text-white shadow-[0_6px_14px_rgba(155,93,229,0.3)] transition active:scale-[0.98]"
+        className="flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-gradient-to-r from-cta-from to-cta-to px-4 text-sm font-bold text-white shadow-[0_6px_14px_rgba(155,93,229,0.3)] transition active:scale-[0.98]"
       >
         シェアする
       </button>

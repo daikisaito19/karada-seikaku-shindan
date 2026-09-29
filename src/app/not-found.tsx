@@ -20,7 +20,7 @@ export default function NotFound() {
 
         <Link
           href="/"
-          className="mt-8 inline-block w-full rounded-full bg-gradient-to-r from-[#ff9ecb] to-accent px-8 py-4 text-base font-bold text-white shadow-[0_8px_18px_rgba(155,93,229,0.35)] transition active:scale-[0.98] sm:w-auto"
+          className="mt-8 inline-block w-full rounded-full bg-gradient-to-r from-cta-from to-cta-to px-8 py-4 text-base font-bold text-white shadow-[0_8px_18px_rgba(155,93,229,0.35)] transition active:scale-[0.98] sm:w-auto"
         >
           トップに戻る
         </Link>

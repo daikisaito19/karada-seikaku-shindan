@@ -29,13 +29,13 @@ export default async function Image() {
           padding: 48,
         }}
       >
-        <div style={{ display: "flex", fontSize: 30, fontWeight: 700, color: "#9b5de5" }}>
+        <div style={{ display: "flex", fontSize: 30, fontWeight: 700, color: "#7a35c9" }}>
           カラダ性格診断
         </div>
         <div style={{ display: "flex", fontSize: 68, fontWeight: 900, color: "#4a3f55", marginTop: 12 }}>
           あなたのカラダには、性格がある。
         </div>
-        <div style={{ display: "flex", fontSize: 30, fontWeight: 700, color: "#8a7d99", marginTop: 14 }}>
+        <div style={{ display: "flex", fontSize: 30, fontWeight: 700, color: "#6d607b", marginTop: 14 }}>
           30問でわかる、あなたの「カラダのクセ」。
         </div>
 

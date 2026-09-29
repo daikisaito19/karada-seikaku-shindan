@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Zen_Maru_Gothic } from "next/font/google";
 import "./globals.css";
 import { SITE_URL } from "@/lib/siteUrl";
@@ -35,6 +35,14 @@ export const metadata: Metadata = {
     title: "カラダ性格診断",
     description: "30問でわかる、あなたの「カラダのクセ」。",
   },
+};
+
+/**
+ * スマホのブラウザバーの色。ページ背景（グラデーションの開始色）に合わせて、
+ * 画面上端との境目が出ないようにする。
+ */
+export const viewport: Viewport = {
+  themeColor: "#fff6e9",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
