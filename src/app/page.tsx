@@ -88,7 +88,7 @@ export default function Home() {
             href="/privacy#contact"
             className="inline-flex min-h-[44px] items-center px-2 underline underline-offset-2"
           >
-            お問い合わせ
+            運営者情報
           </Link>
         </footer>
       </div>

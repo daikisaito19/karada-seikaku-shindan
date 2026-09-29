@@ -70,19 +70,13 @@ export default function PrivacyPage() {
           </section>
 
           <section id="contact" className="scroll-mt-6">
-            <h2 className="mb-1.5 font-bold">運営者情報・お問い合わせ</h2>
-            <p>運営者：【運営者名を入力してください】</p>
-            <p className="mt-1">
-              お問い合わせ：
-              <a
-                href="mailto:【メールアドレスを入力してください】"
-                className="inline-flex min-h-[44px] items-center text-accent underline underline-offset-2"
-              >
-                【メールアドレスを入力してください】
-              </a>
+            <h2 className="mb-1.5 font-bold">運営者情報</h2>
+            <p>運営者：terotero</p>
+            <p className="mt-2">
+              本サービスは、お名前・メールアドレスなどの個人情報を取得していません。そのため、保有個人データの開示・訂正・削除のご請求をお受けする窓口は設けていません。
             </p>
             <p className="mt-2">
-              本サービスの内容・本ポリシーに関するご連絡は、上記のメールアドレスまでお願いします。
+              お問い合わせ窓口を設けた際には、本ページに追記してご案内します。
             </p>
           </section>
 
